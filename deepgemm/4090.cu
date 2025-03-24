@@ -32,7 +32,7 @@ using reg_a = rt<fp8e4m3, TileM/WorkerM, TileK>;
 using reg_b = rt<fp8e4m3, TileN/WorkerN, TileK>;
 using reg_c = rt<float, TileM / WorkerM, TileN / WorkerN>;
 using reg_out_c = rt<bf16, TileM / WorkerM, TileN / WorkerN>;
-using reg_as = reg_c::col_vec;
+using reg_as = reg_c::col_vec; // use reg c tile col vec
 
 struct Globals {
   global_ab A, B;
@@ -180,7 +180,7 @@ __global__ void deepgemm_kernel(const __grid_constant__ Globals g) {
   }
 
 
-  // reuse shard memory
+  // reuse shared memory
   __syncthreads();
   shared_allocator bl((int*)&__shm[0]);
   shared_c (&c_smem)[WorkerM][WorkerN] = bl.allocate<shared_c, WorkerM, WorkerN>();
