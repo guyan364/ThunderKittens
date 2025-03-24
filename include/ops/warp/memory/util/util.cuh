@@ -147,7 +147,7 @@ template<> struct move<float4> {
         asm volatile("st.global.v4.f32 [%4], {%0, %1, %2, %3};\n" : : "f"(src.x), "f"(src.y), "f"(src.z), "f"(src.w), "l"(dst));
     }
 };
-#ifdef KITTENS_HOPPER
+#if defined(KITTENS_HOPPER) || defined(KITTENS_ADA_LOVELACE)
 template<> struct move<fp8e4m3_4> {
     __device__ static inline void ldsm4(fp8e4m3_4& dst1, fp8e4m3_4& dst2, fp8e4m3_4& dst3, fp8e4m3_4& dst4, uint32_t src) {
         asm volatile("ldmatrix.sync.aligned.m8n8.x4.shared::cta.b16 {%0, %1, %2, %3}, [%4];\n" :

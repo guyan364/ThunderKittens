@@ -124,7 +124,7 @@ __device__ static inline void store(const GL &dst, const ST &src, const COORD &i
  *
  * @note This function expects 16-byte alignments. Otherwise, behavior is undefined.
  */
-template<int axis, bool assume_aligned, ducks::st::all ST, ducks::gl::all GL, ducks::coord::tile COORD=coord<ST>, int N_THREADS=WARP_THREADS>
+template<int axis, bool assume_aligned, bool commit, ducks::st::all ST, ducks::gl::all GL, ducks::coord::tile COORD=coord<ST>, int N_THREADS=WARP_THREADS>
 __device__ static inline void load_async(ST &dst, const GL &src, const COORD &idx) {
     using T = typename ST::dtype;
     const int row_stride = src.template stride<axis>();
@@ -168,11 +168,13 @@ __device__ static inline void load_async(ST &dst, const GL &src, const COORD &id
             }
         }
     }
-    asm volatile("cp.async.commit_group;\n" ::: "memory");
+    if constexpr (commit) {
+        asm volatile("cp.async.commit_group;\n" ::: "memory");
+    }
 }
 template<ducks::st::all ST, ducks::gl::all GL, ducks::coord::tile COORD=coord<ST>>
 __device__ static inline void load_async(ST &dst, const GL &src, const COORD &idx) {
-    load_async<2, false, ST, GL, COORD, WARP_THREADS>(dst, src, idx);
+    load_async<2, false, true, ST, GL, COORD, WARP_THREADS>(dst, src, idx);
 }
 
 }
